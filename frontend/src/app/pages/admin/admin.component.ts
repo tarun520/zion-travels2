@@ -52,7 +52,7 @@ export class AdminComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.error = 'Unable to load cars. Is the backend running on port 5055?';
+        this.error = 'Unable to load cars. Is the backend reachable?';
         this.loading = false;
       },
     });

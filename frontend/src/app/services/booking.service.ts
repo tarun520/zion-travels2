@@ -12,7 +12,7 @@ import {
   providedIn: 'root',
 })
 export class BookingService {
-  private readonly apiUrl = 'http://localhost:5055/api/bookings';
+  private readonly apiUrl = 'https://zion-travels-backend-2.onrender.com/api/bookings';
 
   constructor(private http: HttpClient) {}
 

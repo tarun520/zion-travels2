@@ -7,7 +7,7 @@ import { Car, CarInput } from '../models/car.model';
   providedIn: 'root',
 })
 export class CarService {
-  private readonly apiUrl = 'http://localhost:5055/api/cars';
+  private readonly apiUrl = 'https://zion-travels-backend-2.onrender.com/api/cars';
 
   constructor(private http: HttpClient) {}
 
