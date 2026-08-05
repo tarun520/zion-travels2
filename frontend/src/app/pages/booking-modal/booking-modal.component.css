@@ -1,0 +1,141 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 200;
+}
+
+.modal {
+  position: fixed;
+  z-index: 210;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(520px, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.35rem;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+}
+
+.close {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.75rem;
+  border: 0;
+  background: transparent;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #666;
+}
+
+.modal-head {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 0.9rem;
+  align-items: center;
+  margin-bottom: 1.1rem;
+  padding-right: 1.5rem;
+}
+
+.modal-head img {
+  width: 96px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.modal-head h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.modal-head p {
+  margin: 0.3rem 0 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: #444;
+}
+
+input {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.dates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 0.9rem;
+  background: #f5f8ff;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.pay-btn {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.85rem 1.2rem;
+  background: #116dff;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pay-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.msg {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.msg.error {
+  color: #c9181f;
+}
+
+.msg.success {
+  color: #0f6b36;
+}
+
+@media (max-width: 520px) {
+  .dates {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-head {
+    grid-template-columns: 72px 1fr;
+  }
+
+  .modal-head img {
+    width: 72px;
+    height: 56px;
+  }
+}

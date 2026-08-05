@@ -4,3 +4,9 @@ node_modules/
 .idea/
 .wix/
 jsconfig.json
+dist/
+.angular/
+*.log
+.DS_Store
+.env
+backend/.env

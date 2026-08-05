@@ -1,0 +1,17 @@
+<header class="wix-header" [class.open]="menuOpen">
+  <div class="inner">
+    <a routerLink="/" class="logo" (click)="closeMenu()">Zion Travels</a>
+
+    <button class="menu-toggle" type="button" aria-label="Toggle menu" (click)="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav class="nav" [class.show]="menuOpen">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">Home</a>
+      <a href="#fleet" (click)="closeMenu()">Cars</a>
+      <a href="#about" (click)="closeMenu()">About</a>
+      <a routerLink="/admin" routerLinkActive="active" (click)="closeMenu()">Admin</a>
+      <a class="book-btn" href="#fleet" (click)="closeMenu()">Book</a>
+    </nav>
+  </div>
+</header>

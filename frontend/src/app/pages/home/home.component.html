@@ -1,0 +1,127 @@
+<section class="hero">
+  <div class="hero-media" aria-hidden="true">
+    <video
+      #heroVideo
+      class="hero-video"
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="auto"
+      poster="/wix/banner.jpg"
+    >
+      <source
+        src="https://video.wixstatic.com/video/11062b_802873a9c69b4642966143da07b8ea88/720p/mp4/file.mp4"
+        type="video/mp4"
+      />
+    </video>
+  </div>
+  <div class="hero-shade"></div>
+  <div class="hero-copy">
+    <h1 class="hero-title">
+      <span class="line line-1">Ride in Comfort Today</span>
+      <span class="line line-2" aria-hidden="true">Ride in Comfort Today</span>
+      <span class="line line-3" aria-hidden="true">Ride in Comfort Today</span>
+    </h1>
+    <p class="hero-lede">
+      Let Zion Travels transform your travel experience with our top-notch rental services,
+      ensuring comfort and reliability through every journey.
+    </p>
+    <a class="cta-red" href="#fleet">Rent Now</a>
+  </div>
+</section>
+
+<section id="about" class="about">
+  <div class="wrap about-grid">
+    <div class="about-copy reveal">
+      <h2>Who We Are</h2>
+      <p>
+        Zion Travels is dedicated to providing high-quality car rental services tailored for
+        tourists and locals alike.
+      </p>
+      <p>
+        We specialize in clean, well-maintained vehicles operated by professional drivers.
+      </p>
+    </div>
+    <div class="about-media reveal">
+      <img class="shot main" src="/wix/car2-lg.jpg" alt="Zion Travels vehicle" />
+      <img class="shot float" src="/wix/car1-lg.jpg" alt="City rental car" />
+    </div>
+  </div>
+</section>
+
+<section id="fleet" class="fleet">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <h2>Our Cars</h2>
+      <p>Cars added from Admin — with live prices</p>
+    </div>
+
+    @if (loading) {
+      <p class="status">Loading cars…</p>
+    } @else if (error) {
+      <p class="status error">{{ error }}</p>
+    } @else if (cars.length === 0) {
+      <p class="status">No cars yet. Add cars from Admin.</p>
+    } @else {
+      <div class="fleet-grid">
+        @for (car of cars; track car.id) {
+          <article class="fleet-card">
+            <div class="thumb">
+              <img [src]="car.image" [alt]="car.name" loading="lazy" />
+              @if (!car.available) {
+                <span class="badge">Unavailable</span>
+              }
+            </div>
+            <div class="body">
+              <h3>{{ car.name }}</h3>
+              <p class="meta">{{ car.brand }} · {{ car.type }} · {{ car.seats }} seats · {{ car.transmission }}</p>
+              <p class="price">{{ car.price | currency:'INR':'symbol':'1.0-0' }}<span>/{{ car.priceUnit }}</span></p>
+              <button
+                class="book-car-btn"
+                type="button"
+                [disabled]="!car.available"
+                (click)="openBooking(car)"
+              >
+                {{ car.available ? 'Book Now' : 'Unavailable' }}
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </div>
+</section>
+
+<app-booking-modal
+  [open]="bookingOpen"
+  [car]="selectedCar"
+  (closed)="closeBooking()"
+/>
+
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div>
+      <h3>Zion Travels</h3>
+      <p>Comfortable rides for every journey.</p>
+    </div>
+    <div>
+      <h4>Contact</h4>
+      <p>info&#64;mysite.com</p>
+      <p>123-456-7890</p>
+    </div>
+    <div>
+      <h4>Address</h4>
+      <p>500 Terry Francine Street, 6th Floor,<br />San Francisco, CA 94158</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2035 by Zion Travels.</p>
+    <div class="links">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Accessibility Statement</a>
+      <a href="#">Terms & Conditions</a>
+      <a href="#">Refund Policy</a>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --wix-white: #ffffff;
+  --wix-black: #000000;
+  --wix-blue: #116dff;
+  --wix-blue-hover: #0b5bd4;
+  --wix-red: #e81f27;
+  --wix-red-hover: #c9181f;
+  --wix-gray: #727272;
+  --wix-light-gray: #f5f5f5;
+  --wix-border: #e5e5e5;
+  --wix-footer: #1a1a1a;
+  --font-body: 'Manrope', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-display: 'Manrope', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  background: var(--wix-white);
+  color: var(--wix-black);
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea,
+a {
+  font: inherit;
+}

@@ -1,0 +1,132 @@
+<section class="admin">
+  <div class="admin-hero">
+    <p class="eyebrow">Zion Travels</p>
+    <h1>Fleet admin</h1>
+    <p class="lede">Add cars and set daily prices for the portfolio section.</p>
+  </div>
+
+  <div class="admin-layout">
+    <form class="car-form" (ngSubmit)="submit()" #carForm="ngForm">
+      <h2>{{ editingId ? 'Edit car' : 'Add a car' }}</h2>
+
+      @if (error) {
+        <p class="banner error">{{ error }}</p>
+      }
+      @if (success) {
+        <p class="banner success">{{ success }}</p>
+      }
+
+      <div class="field-grid">
+        <label>
+          <span>Car name *</span>
+          <input name="name" [(ngModel)]="form.name" required placeholder="e.g. Toyota Innova Crysta" />
+        </label>
+
+        <label>
+          <span>Price (INR) *</span>
+          <input name="price" type="number" min="0" step="1" [(ngModel)]="form.price" required />
+        </label>
+
+        <label>
+          <span>Brand</span>
+          <input name="brand" [(ngModel)]="form.brand" placeholder="Toyota" />
+        </label>
+
+        <label>
+          <span>Type</span>
+          <select name="type" [(ngModel)]="form.type">
+            <option>Sedan</option>
+            <option>SUV</option>
+            <option>Hatchback</option>
+            <option>MUV</option>
+            <option>Luxury</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Price unit</span>
+          <select name="priceUnit" [(ngModel)]="form.priceUnit">
+            <option value="day">Per day</option>
+            <option value="km">Per km</option>
+            <option value="trip">Per trip</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Seats</span>
+          <input name="seats" type="number" min="2" max="20" [(ngModel)]="form.seats" />
+        </label>
+
+        <label>
+          <span>Transmission</span>
+          <select name="transmission" [(ngModel)]="form.transmission">
+            <option>Manual</option>
+            <option>Automatic</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Fuel</span>
+          <select name="fuel" [(ngModel)]="form.fuel">
+            <option>Petrol</option>
+            <option>Diesel</option>
+            <option>CNG</option>
+            <option>Electric</option>
+            <option>Hybrid</option>
+          </select>
+        </label>
+      </div>
+
+      <label class="full">
+        <span>Image URL</span>
+        <input name="image" [(ngModel)]="form.image" placeholder="https://…" />
+      </label>
+
+      <label class="full">
+        <span>Description</span>
+        <textarea name="description" rows="3" [(ngModel)]="form.description" placeholder="Short note about the car"></textarea>
+      </label>
+
+      <label class="checkbox">
+        <input type="checkbox" name="available" [(ngModel)]="form.available" />
+        <span>Available for booking</span>
+      </label>
+
+      <div class="actions">
+        <button type="submit" class="btn primary" [disabled]="saving">
+          {{ saving ? 'Saving…' : editingId ? 'Update car' : 'Add car' }}
+        </button>
+        @if (editingId) {
+          <button type="button" class="btn secondary" (click)="cancelEdit()">Cancel</button>
+        }
+      </div>
+    </form>
+
+    <div class="inventory">
+      <h2>Current fleet</h2>
+
+      @if (loading) {
+        <p class="muted">Loading…</p>
+      } @else if (cars.length === 0) {
+        <p class="muted">No cars yet. Use the form to add one.</p>
+      } @else {
+        <ul class="car-list">
+          @for (car of cars; track car.id) {
+            <li>
+              <img [src]="car.image" [alt]="car.name" />
+              <div class="info">
+                <strong>{{ car.name }}</strong>
+                <span>{{ car.brand }} · {{ car.type }}</span>
+                <span class="price">{{ car.price | currency:'INR':'symbol':'1.0-0' }}/{{ car.priceUnit }}</span>
+              </div>
+              <div class="row-actions">
+                <button type="button" (click)="startEdit(car)">Edit</button>
+                <button type="button" class="danger" (click)="remove(car)">Delete</button>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  </div>
+</section>

@@ -1,0 +1,58 @@
+[
+  {
+    "id": "1",
+    "name": "Toyota Innova Crysta",
+    "brand": "Toyota",
+    "type": "SUV",
+    "price": 3500,
+    "priceUnit": "day",
+    "seats": 7,
+    "transmission": "Automatic",
+    "fuel": "Diesel",
+    "image": "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=800&q=80",
+    "description": "Spacious family SUV ideal for outstation trips and airport transfers.",
+    "available": true
+  },
+  {
+    "id": "2",
+    "name": "Maruti Swift Dzire",
+    "brand": "Maruti",
+    "type": "Sedan",
+    "price": 1800,
+    "priceUnit": "day",
+    "seats": 5,
+    "transmission": "Manual",
+    "fuel": "Petrol",
+    "image": "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800&q=80",
+    "description": "Compact and fuel-efficient sedan for city rides and short getaways.",
+    "available": true
+  },
+  {
+    "id": "3",
+    "name": "Mahindra XUV700",
+    "brand": "Mahindra",
+    "type": "SUV",
+    "price": 4200,
+    "priceUnit": "day",
+    "seats": 7,
+    "transmission": "Automatic",
+    "fuel": "Diesel",
+    "image": "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=800&q=80",
+    "description": "Premium SUV with modern features for comfortable long drives.",
+    "available": true
+  },
+  {
+    "id": "32bc0165-050e-4071-b5af-8e984f9fa99f",
+    "name": "Honda City",
+    "brand": "Honda",
+    "type": "Sedan",
+    "price": 2200,
+    "priceUnit": "day",
+    "seats": 5,
+    "transmission": "Manual",
+    "fuel": "Petrol",
+    "image": "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800&q=80",
+    "description": "Comfortable sedan for city travel",
+    "available": true
+  }
+]

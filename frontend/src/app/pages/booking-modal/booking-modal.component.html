@@ -1,0 +1,55 @@
+@if (open && car) {
+  <div class="backdrop" (click)="close()"></div>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="booking-title">
+    <button class="close" type="button" (click)="close()" aria-label="Close">×</button>
+
+    <div class="modal-head">
+      <img [src]="car.image" [alt]="car.name" />
+      <div>
+        <h2 id="booking-title">Book {{ car.name }}</h2>
+        <p>{{ car.brand }} · {{ car.type }} · {{ car.price | currency:'INR':'symbol':'1.0-0' }}/{{ car.priceUnit }}</p>
+      </div>
+    </div>
+
+    <form class="form" (ngSubmit)="submit()">
+      <label>
+        <span>Full name</span>
+        <input [(ngModel)]="customerName" name="customerName" required placeholder="Your name" />
+      </label>
+      <label>
+        <span>Email</span>
+        <input [(ngModel)]="customerEmail" name="customerEmail" type="email" required placeholder="you@email.com" />
+      </label>
+      <label>
+        <span>Phone</span>
+        <input [(ngModel)]="customerPhone" name="customerPhone" required placeholder="10-digit mobile" />
+      </label>
+      <div class="dates">
+        <label>
+          <span>Start date</span>
+          <input [(ngModel)]="startDate" name="startDate" type="date" required />
+        </label>
+        <label>
+          <span>End date</span>
+          <input [(ngModel)]="endDate" name="endDate" type="date" required />
+        </label>
+      </div>
+
+      <div class="summary">
+        <span>{{ days }} day(s)</span>
+        <strong>Total {{ total | currency:'INR':'symbol':'1.0-0' }}</strong>
+      </div>
+
+      @if (error) {
+        <p class="msg error">{{ error }}</p>
+      }
+      @if (success) {
+        <p class="msg success">{{ success }}</p>
+      }
+
+      <button class="pay-btn" type="submit" [disabled]="submitting">
+        {{ submitting ? 'Processing…' : 'Pay with Razorpay' }}
+      </button>
+    </form>
+  </div>
+}
