@@ -75,7 +75,7 @@
             </div>
             <div class="body">
               <h3>{{ car.name }}</h3>
-              <p class="meta">{{ car.brand }} · {{ car.type }} · {{ car.seats }} seats · {{ car.transmission }}</p>
+              <p class="meta">{{ car.brand }} · {{ car.type }} · {{ car.seats }} seats · Qty {{ car.quantity || 1 }}</p>
               <p class="price">{{ car.price | currency:'INR':'symbol':'1.0-0' }}<span>/{{ car.priceUnit }}</span></p>
               <button
                 class="book-car-btn"
@@ -97,7 +97,15 @@
   [open]="bookingOpen"
   [car]="selectedCar"
   (closed)="closeBooking()"
+  (booked)="onBooked($event)"
 />
+
+@if (bookingSuccess) {
+  <div class="booking-toast" role="status">
+    <p>{{ bookingSuccess }}</p>
+    <button type="button" (click)="dismissSuccess()" aria-label="Dismiss">×</button>
+  </div>
+}
 
 <footer class="site-footer">
   <div class="wrap footer-grid">

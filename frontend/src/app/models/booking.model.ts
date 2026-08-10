@@ -17,6 +17,9 @@ export interface CreateOrderResponse {
   carName: string;
   days: number;
   amountInr: number;
+  totalAmountInr: number;
+  advanceAmountInr: number;
+  remainingAmountInr: number;
 }
 
 export interface VerifyPaymentRequest {

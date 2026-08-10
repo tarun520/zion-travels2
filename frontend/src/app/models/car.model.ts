@@ -6,6 +6,7 @@ export interface Car {
   price: number;
   priceUnit: string;
   seats: number;
+  quantity: number;
   transmission: string;
   fuel: string;
   image: string;

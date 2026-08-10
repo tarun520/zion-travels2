@@ -20,6 +20,9 @@ app.get('/api/health', (_req, res) => {
         process.env.RAZORPAY_KEY_SECRET &&
         !process.env.RAZORPAY_KEY_ID.includes('ReplaceWith')
     ),
+    mailConfigured: Boolean(
+      process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS
+    ),
   });
 });
 

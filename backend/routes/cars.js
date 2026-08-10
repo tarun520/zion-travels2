@@ -44,6 +44,7 @@ router.post('/', (req, res) => {
       price,
       priceUnit = 'day',
       seats,
+      quantity = 1,
       transmission,
       fuel,
       image,
@@ -60,6 +61,11 @@ router.post('/', (req, res) => {
       return res.status(400).json({ error: 'Price must be a valid non-negative number' });
     }
 
+    const numericQuantity = Number(quantity);
+    if (Number.isNaN(numericQuantity) || numericQuantity < 1) {
+      return res.status(400).json({ error: 'Quantity must be at least 1' });
+    }
+
     const cars = readCars();
     const car = {
       id: uuidv4(),
@@ -69,6 +75,7 @@ router.post('/', (req, res) => {
       price: numericPrice,
       priceUnit: priceUnit || 'day',
       seats: seats ? Number(seats) : 5,
+      quantity: Math.floor(numericQuantity),
       transmission: transmission || 'Manual',
       fuel: fuel || 'Petrol',
       image: image || 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800&q=80',
@@ -106,6 +113,14 @@ router.put('/:id', (req, res) => {
 
     if (updates.seats !== undefined) {
       updates.seats = Number(updates.seats);
+    }
+
+    if (updates.quantity !== undefined) {
+      const numericQuantity = Number(updates.quantity);
+      if (Number.isNaN(numericQuantity) || numericQuantity < 1) {
+        return res.status(400).json({ error: 'Quantity must be at least 1' });
+      }
+      updates.quantity = Math.floor(numericQuantity);
     }
 
     if (updates.available !== undefined) {

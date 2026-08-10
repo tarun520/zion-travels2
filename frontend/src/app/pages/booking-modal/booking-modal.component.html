@@ -8,6 +8,7 @@
       <div>
         <h2 id="booking-title">Book {{ car.name }}</h2>
         <p>{{ car.brand }} · {{ car.type }} · {{ car.price | currency:'INR':'symbol':'1.0-0' }}/{{ car.priceUnit }}</p>
+        <p class="stock">Fleet size: {{ car.quantity || 1 }}</p>
       </div>
     </div>
 
@@ -27,18 +28,52 @@
       <div class="dates">
         <label>
           <span>Start date</span>
-          <input [(ngModel)]="startDate" name="startDate" type="date" required />
+          <input
+            [(ngModel)]="startDate"
+            name="startDate"
+            type="date"
+            required
+            (ngModelChange)="onDatesChange()"
+          />
         </label>
         <label>
           <span>End date</span>
-          <input [(ngModel)]="endDate" name="endDate" type="date" required />
+          <input
+            [(ngModel)]="endDate"
+            name="endDate"
+            type="date"
+            required
+            (ngModelChange)="onDatesChange()"
+          />
         </label>
       </div>
 
       <div class="summary">
-        <span>{{ days }} day(s)</span>
-        <strong>Total {{ total | currency:'INR':'symbol':'1.0-0' }}</strong>
+        <div class="summary-row">
+          <span>{{ days }} day(s) · Total fare</span>
+          <strong>{{ total | currency:'INR':'symbol':'1.0-0' }}</strong>
+        </div>
+        <div class="summary-row">
+          <span>Pay now (advance)</span>
+          <strong>{{ onlineAdvance | currency:'INR':'symbol':'1.0-0' }}</strong>
+        </div>
+        <div class="summary-row muted">
+          <span>Pay offline later</span>
+          <strong>{{ remainingOffline | currency:'INR':'symbol':'1.0-0' }}</strong>
+        </div>
       </div>
+
+      @if (checkingAvailability) {
+        <p class="msg">Checking availability…</p>
+      } @else if (availability) {
+        <p class="msg" [class.error]="!availability.available" [class.success]="availability.available">
+          @if (availability.available) {
+            {{ availability.remaining }} of {{ availability.quantity }} available for these dates
+          } @else {
+            Fully booked for these dates ({{ availability.booked }}/{{ availability.quantity }} taken)
+          }
+        </p>
+      }
 
       @if (error) {
         <p class="msg error">{{ error }}</p>
@@ -47,8 +82,8 @@
         <p class="msg success">{{ success }}</p>
       }
 
-      <button class="pay-btn" type="submit" [disabled]="submitting">
-        {{ submitting ? 'Processing…' : 'Pay with Razorpay' }}
+      <button class="pay-btn" type="submit" [disabled]="!canPay">
+        {{ submitting ? 'Processing…' : 'Pay ₹' + onlineAdvance + ' advance' }}
       </button>
     </form>
   </div>

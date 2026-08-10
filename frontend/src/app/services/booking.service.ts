@@ -8,6 +8,16 @@ import {
   VerifyPaymentRequest,
 } from '../models/booking.model';
 
+export interface AvailabilityResponse {
+  carId: string;
+  startDate: string;
+  endDate: string;
+  quantity: number;
+  booked: number;
+  remaining: number;
+  available: boolean;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -20,12 +30,28 @@ export class BookingService {
     return this.http.get<BookingConfig>(`${this.apiUrl}/config`);
   }
 
+  checkAvailability(carId: string, startDate: string, endDate: string): Observable<AvailabilityResponse> {
+    return this.http.get<AvailabilityResponse>(`${this.apiUrl}/availability`, {
+      params: { carId, startDate, endDate },
+    });
+  }
+
   createOrder(payload: BookingRequest): Observable<CreateOrderResponse> {
     return this.http.post<CreateOrderResponse>(`${this.apiUrl}/create-order`, payload);
   }
 
-  verifyPayment(payload: VerifyPaymentRequest): Observable<{ success: boolean; booking: unknown }> {
-    return this.http.post<{ success: boolean; booking: unknown }>(`${this.apiUrl}/verify`, payload);
+  verifyPayment(payload: VerifyPaymentRequest): Observable<{
+    success: boolean;
+    booking: unknown;
+    receiptEmailSent?: boolean;
+    receiptEmailQueued?: boolean;
+  }> {
+    return this.http.post<{
+      success: boolean;
+      booking: unknown;
+      receiptEmailSent?: boolean;
+      receiptEmailQueued?: boolean;
+    }>(`${this.apiUrl}/verify`, payload);
   }
 
   loadRazorpayScript(): Promise<void> {

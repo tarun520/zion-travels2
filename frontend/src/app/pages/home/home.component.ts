@@ -19,6 +19,8 @@ export class HomeComponent implements OnInit, AfterViewInit {
   error = '';
   selectedCar: Car | null = null;
   bookingOpen = false;
+  bookingSuccess = '';
+  private successTimer?: ReturnType<typeof setTimeout>;
 
   private revealObserver?: IntersectionObserver;
 
@@ -93,5 +95,23 @@ export class HomeComponent implements OnInit, AfterViewInit {
   closeBooking(): void {
     this.bookingOpen = false;
     this.selectedCar = null;
+  }
+
+  onBooked(message: string): void {
+    this.closeBooking();
+    this.bookingSuccess = message;
+    if (this.successTimer) {
+      clearTimeout(this.successTimer);
+    }
+    this.successTimer = setTimeout(() => {
+      this.bookingSuccess = '';
+    }, 5000);
+  }
+
+  dismissSuccess(): void {
+    this.bookingSuccess = '';
+    if (this.successTimer) {
+      clearTimeout(this.successTimer);
+    }
   }
 }

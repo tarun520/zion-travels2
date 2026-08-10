@@ -60,6 +60,11 @@
   font-size: 0.9rem;
 }
 
+.modal-head .stock {
+  color: #116dff;
+  font-weight: 600;
+}
+
 .form {
   display: flex;
   flex-direction: column;
@@ -89,12 +94,24 @@ input {
 
 .summary {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 0.45rem;
   padding: 0.8rem 0.9rem;
   background: #f5f8ff;
   border-radius: 8px;
   font-size: 0.95rem;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.summary-row.muted {
+  color: #666;
+  font-size: 0.9rem;
 }
 
 .pay-btn {

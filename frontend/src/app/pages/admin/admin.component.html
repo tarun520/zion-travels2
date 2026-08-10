@@ -58,6 +58,11 @@
         </label>
 
         <label>
+          <span>Quantity *</span>
+          <input name="quantity" type="number" min="1" max="100" [(ngModel)]="form.quantity" required />
+        </label>
+
+        <label>
           <span>Transmission</span>
           <select name="transmission" [(ngModel)]="form.transmission">
             <option>Manual</option>
@@ -116,7 +121,7 @@
               <img [src]="car.image" [alt]="car.name" />
               <div class="info">
                 <strong>{{ car.name }}</strong>
-                <span>{{ car.brand }} · {{ car.type }}</span>
+                <span>{{ car.brand }} · {{ car.type }} · Qty {{ car.quantity || 1 }}</span>
                 <span class="price">{{ car.price | currency:'INR':'symbol':'1.0-0' }}/{{ car.priceUnit }}</span>
               </div>
               <div class="row-actions">

@@ -1,8 +1,8 @@
-import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
+import { Component, EventEmitter, Input, NgZone, OnChanges, Output } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Car } from '../../models/car.model';
-import { BookingService } from '../../services/booking.service';
+import { BookingService, AvailabilityResponse } from '../../services/booking.service';
 
 @Component({
   selector: 'app-booking-modal',
@@ -15,7 +15,7 @@ export class BookingModalComponent implements OnChanges {
   @Input() car: Car | null = null;
   @Input() open = false;
   @Output() closed = new EventEmitter<void>();
-  @Output() booked = new EventEmitter<void>();
+  @Output() booked = new EventEmitter<string>();
 
   customerName = '';
   customerEmail = '';
@@ -24,10 +24,15 @@ export class BookingModalComponent implements OnChanges {
   endDate = '';
 
   submitting = false;
+  checkingAvailability = false;
   error = '';
   success = '';
+  availability: AvailabilityResponse | null = null;
 
-  constructor(private bookingService: BookingService) {}
+  constructor(
+    private bookingService: BookingService,
+    private zone: NgZone
+  ) {}
 
   ngOnChanges(): void {
     if (this.open) {
@@ -39,6 +44,8 @@ export class BookingModalComponent implements OnChanges {
       this.error = '';
       this.success = '';
       this.submitting = false;
+      this.availability = null;
+      this.refreshAvailability();
     }
   }
 
@@ -56,11 +63,74 @@ export class BookingModalComponent implements OnChanges {
     return this.car ? this.car.price * this.days : 0;
   }
 
+  readonly advanceAmount = 1000;
+
+  get remainingOffline(): number {
+    return Math.max(this.total - this.advanceAmount, 0);
+  }
+
+  get onlineAdvance(): number {
+    return Math.min(this.advanceAmount, this.total);
+  }
+
+  get canPay(): boolean {
+    return Boolean(this.availability?.available) && !this.checkingAvailability && !this.submitting;
+  }
+
   close(): void {
     if (this.submitting) {
       return;
     }
     this.closed.emit();
+  }
+
+  onDatesChange(): void {
+    this.refreshAvailability();
+  }
+
+  refreshAvailability(): void {
+    if (!this.car || !this.startDate || !this.endDate) {
+      this.availability = null;
+      return;
+    }
+    if (new Date(this.endDate) <= new Date(this.startDate)) {
+      this.availability = null;
+      this.error = 'End date must be after start date.';
+      return;
+    }
+
+    this.checkingAvailability = true;
+    this.error = '';
+    this.bookingService.checkAvailability(this.car.id, this.startDate, this.endDate).subscribe({
+      next: (result) => {
+        this.availability = result;
+        this.checkingAvailability = false;
+        if (!result.available) {
+          this.error = 'No cars left for these dates. Try different dates.';
+        }
+      },
+      error: () => {
+        this.checkingAvailability = false;
+        this.availability = null;
+        this.error = 'Unable to check availability.';
+      },
+    });
+  }
+
+  private finishSuccess(message: string): void {
+    this.zone.run(() => {
+      this.submitting = false;
+      this.success = message;
+      this.booked.emit(message);
+    });
+  }
+
+  private finishError(message: string): void {
+    this.zone.run(() => {
+      this.submitting = false;
+      this.error = message;
+      this.refreshAvailability();
+    });
   }
 
   submit(): void {
@@ -79,8 +149,12 @@ export class BookingModalComponent implements OnChanges {
       this.error = 'Please select booking dates.';
       return;
     }
-    if (new Date(this.endDate) < new Date(this.startDate)) {
-      this.error = 'End date must be on or after start date.';
+    if (new Date(this.endDate) <= new Date(this.startDate)) {
+      this.error = 'End date must be after start date.';
+      return;
+    }
+    if (!this.availability?.available) {
+      this.error = 'No cars left for these dates.';
       return;
     }
 
@@ -105,14 +179,17 @@ export class BookingModalComponent implements OnChanges {
                   demoConfirm: true,
                 })
                 .subscribe({
-                  next: () => {
-                    this.submitting = false;
-                    this.success = `Demo booking confirmed for ${order.carName}. Add Razorpay keys in backend/.env for live payments.`;
-                    this.booked.emit();
+                  next: (result) => {
+                    const mailNote =
+                      result?.receiptEmailQueued || result?.receiptEmailSent
+                        ? ' A receipt will be emailed to you.'
+                        : '';
+                    this.finishSuccess(
+                      `Advance paid. Booking confirmed for ${order.carName}. Pay remaining balance offline.${mailNote}`
+                    );
                   },
                   error: (err) => {
-                    this.submitting = false;
-                    this.error = err?.error?.error || 'Could not confirm demo booking.';
+                    this.finishError(err?.error?.error || 'Could not confirm booking.');
                   },
                 });
               return;
@@ -124,7 +201,7 @@ export class BookingModalComponent implements OnChanges {
               amount: order.amount,
               currency: order.currency,
               name: 'Zion Travels',
-              description: `${order.carName} · ${order.days} day(s)`,
+              description: `${order.carName} · Advance ₹${order.advanceAmountInr}`,
               order_id: order.orderId,
               prefill: {
                 name: this.customerName.trim(),
@@ -145,33 +222,33 @@ export class BookingModalComponent implements OnChanges {
                     razorpay_signature: response.razorpay_signature,
                   })
                   .subscribe({
-                    next: () => {
-                      this.submitting = false;
-                      this.success = 'Payment successful. Your car is booked!';
-                      this.booked.emit();
+                    next: (result) => {
+                      const mailNote =
+                        result?.receiptEmailQueued || result?.receiptEmailSent
+                          ? ' A receipt will be emailed to you.'
+                          : '';
+                      this.finishSuccess(
+                        `Advance paid. Booking confirmed! Pay remaining balance offline.${mailNote}`
+                      );
                     },
                     error: (err) => {
-                      this.submitting = false;
-                      this.error = err?.error?.error || 'Payment verification failed.';
+                      this.finishError(err?.error?.error || 'Payment verification failed.');
                     },
                   });
               },
               modal: {
                 ondismiss: () => {
-                  this.submitting = false;
-                  this.error = 'Payment cancelled.';
+                  this.finishError('Payment cancelled.');
                 },
               },
             });
             rzp.open();
           } catch {
-            this.submitting = false;
-            this.error = 'Unable to start Razorpay checkout.';
+            this.finishError('Unable to start Razorpay checkout.');
           }
         },
         error: (err) => {
-          this.submitting = false;
-          this.error = err?.error?.error || 'Failed to create booking order.';
+          this.finishError(err?.error?.error || 'Failed to create booking order.');
         },
       });
   }

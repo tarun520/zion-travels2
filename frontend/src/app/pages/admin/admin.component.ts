@@ -35,6 +35,7 @@ export class AdminComponent implements OnInit {
       price: 0,
       priceUnit: 'day',
       seats: 5,
+      quantity: 1,
       transmission: 'Manual',
       fuel: 'Petrol',
       image: '',
@@ -67,6 +68,7 @@ export class AdminComponent implements OnInit {
       price: car.price,
       priceUnit: car.priceUnit,
       seats: car.seats,
+      quantity: car.quantity || 1,
       transmission: car.transmission,
       fuel: car.fuel,
       image: car.image,
@@ -95,6 +97,10 @@ export class AdminComponent implements OnInit {
       this.error = 'Enter a valid price.';
       return;
     }
+    if (!this.form.quantity || Number(this.form.quantity) < 1) {
+      this.error = 'Quantity must be at least 1.';
+      return;
+    }
 
     const payload: CarInput = {
       ...this.form,
@@ -106,6 +112,7 @@ export class AdminComponent implements OnInit {
         'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800&q=80',
       price: Number(this.form.price),
       seats: Number(this.form.seats) || 5,
+      quantity: Math.floor(Number(this.form.quantity)) || 1,
     };
 
     this.saving = true;
