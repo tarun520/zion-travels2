@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
+const { normalizePeriods } = require('../services/availability');
 
 const router = express.Router();
 const dataPath = path.join(__dirname, '..', 'data', 'cars.json');
@@ -15,9 +16,35 @@ function writeCars(cars) {
   fs.writeFileSync(dataPath, JSON.stringify(cars, null, 2));
 }
 
+function sanitizeUnavailablePeriods(periods) {
+  if (!Array.isArray(periods)) {
+    return [];
+  }
+
+  return periods
+    .map((period) => ({
+      id: period.id || uuidv4(),
+      startAt: String(period.startAt),
+      endAt: String(period.endAt),
+      note: period.note ? String(period.note).trim() : '',
+    }))
+    .filter((period) => {
+      const start = new Date(period.startAt);
+      const end = new Date(period.endAt);
+      return !Number.isNaN(start.getTime()) && !Number.isNaN(end.getTime()) && end > start;
+    });
+}
+
+function normalizeCar(car) {
+  return {
+    ...car,
+    unavailablePeriods: sanitizeUnavailablePeriods(normalizePeriods(car)),
+  };
+}
+
 router.get('/', (_req, res) => {
   try {
-    res.json(readCars());
+    res.json(readCars().map(normalizeCar));
   } catch (err) {
     res.status(500).json({ error: 'Failed to load cars' });
   }
@@ -29,7 +56,7 @@ router.get('/:id', (req, res) => {
     if (!car) {
       return res.status(404).json({ error: 'Car not found' });
     }
-    res.json(car);
+    res.json(normalizeCar(car));
   } catch (err) {
     res.status(500).json({ error: 'Failed to load car' });
   }
@@ -50,6 +77,7 @@ router.post('/', (req, res) => {
       image,
       description,
       available = true,
+      unavailablePeriods = [],
     } = req.body;
 
     if (!name || price === undefined || price === null || price === '') {
@@ -81,6 +109,7 @@ router.post('/', (req, res) => {
       image: image || 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800&q=80',
       description: description ? String(description).trim() : '',
       available: Boolean(available),
+      unavailablePeriods: sanitizeUnavailablePeriods(unavailablePeriods),
     };
 
     cars.push(car);
@@ -127,7 +156,11 @@ router.put('/:id', (req, res) => {
       updates.available = Boolean(updates.available);
     }
 
-    const car = { ...existing, ...updates, id: existing.id };
+    if (updates.unavailablePeriods !== undefined) {
+      updates.unavailablePeriods = sanitizeUnavailablePeriods(updates.unavailablePeriods);
+    }
+
+    const car = normalizeCar({ ...existing, ...updates, id: existing.id });
     cars[index] = car;
     writeCars(cars);
     res.json(car);

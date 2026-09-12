@@ -50,40 +50,28 @@
 
       <div class="summary">
         <div class="summary-row">
-          <span>{{ days }} day(s) · Total fare</span>
+          <span>{{ days }} day(s) · Estimated total</span>
           <strong>{{ total | currency:'INR':'symbol':'1.0-0' }}</strong>
         </div>
-        <div class="summary-row">
-          <span>Pay now (advance)</span>
-          <strong>{{ onlineAdvance | currency:'INR':'symbol':'1.0-0' }}</strong>
-        </div>
-        <div class="summary-row muted">
-          <span>Pay offline later</span>
-          <strong>{{ remainingOffline | currency:'INR':'symbol':'1.0-0' }}</strong>
-        </div>
+        <p class="summary-note">Payment and confirmation will be handled over WhatsApp.</p>
       </div>
-
-      @if (checkingAvailability) {
-        <p class="msg">Checking availability…</p>
-      } @else if (availability) {
-        <p class="msg" [class.error]="!availability.available" [class.success]="availability.available">
-          @if (availability.available) {
-            {{ availability.remaining }} of {{ availability.quantity }} available for these dates
-          } @else {
-            Fully booked for these dates ({{ availability.booked }}/{{ availability.quantity }} taken)
-          }
-        </p>
-      }
 
       @if (error) {
         <p class="msg error">{{ error }}</p>
-      }
-      @if (success) {
-        <p class="msg success">{{ success }}</p>
+      } @else if (car && !car.available) {
+        <p class="msg error">This car is currently unavailable. Contact admin to check availability.</p>
+      } @else if (dateAvailabilityMessage) {
+        <p
+          class="msg"
+          [class.error]="!canSubmit"
+          [class.success]="canSubmit && datesValid"
+        >
+          {{ dateAvailabilityMessage }}
+        </p>
       }
 
-      <button class="pay-btn" type="submit" [disabled]="!canPay">
-        {{ submitting ? 'Processing…' : 'Pay ₹' + onlineAdvance + ' advance' }}
+      <button class="whatsapp-btn" type="submit" [disabled]="!canSubmit">
+        Chat on WhatsApp
       </button>
     </form>
   </div>

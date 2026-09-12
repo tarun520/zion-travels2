@@ -202,6 +202,66 @@ textarea:focus {
   font-weight: 700;
 }
 
+.info .status {
+  font-weight: 600;
+  color: #0f6b36;
+}
+
+.info .status.unavailable {
+  color: #c9181f;
+}
+
+.unavailable-section {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--wix-border);
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.unavailable-section h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.section-note,
+.period-note {
+  color: var(--wix-gray);
+  font-size: 0.85rem;
+}
+
+.period-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin: 0.85rem 0;
+}
+
+.period-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.period-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--wix-border);
+  border-radius: 6px;
+  background: #fff;
+}
+
+.period-list strong {
+  display: block;
+  font-size: 0.88rem;
+}
+
 .row-actions {
   display: flex;
   flex-direction: column;

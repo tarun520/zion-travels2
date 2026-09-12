@@ -1,3 +1,10 @@
+export interface UnavailablePeriod {
+  id: string;
+  startAt: string;
+  endAt: string;
+  note?: string;
+}
+
 export interface Car {
   id: string;
   name: string;
@@ -12,6 +19,7 @@ export interface Car {
   image: string;
   description: string;
   available: boolean;
+  unavailablePeriods?: UnavailablePeriod[];
 }
 
 export type CarInput = Omit<Car, 'id'>;

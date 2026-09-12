@@ -1,8 +1,9 @@
-import { Component, EventEmitter, Input, NgZone, OnChanges, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { buildWhatsAppUrl } from '../../config/contact.config';
 import { Car } from '../../models/car.model';
-import { BookingService, AvailabilityResponse } from '../../services/booking.service';
+import { getCarAvailability } from '../../utils/availability.util';
 
 @Component({
   selector: 'app-booking-modal',
@@ -23,16 +24,8 @@ export class BookingModalComponent implements OnChanges {
   startDate = '';
   endDate = '';
 
-  submitting = false;
-  checkingAvailability = false;
   error = '';
-  success = '';
-  availability: AvailabilityResponse | null = null;
-
-  constructor(
-    private bookingService: BookingService,
-    private zone: NgZone
-  ) {}
+  dateAvailabilityMessage = '';
 
   ngOnChanges(): void {
     if (this.open) {
@@ -42,10 +35,7 @@ export class BookingModalComponent implements OnChanges {
       this.startDate = today.toISOString().slice(0, 10);
       this.endDate = tomorrow.toISOString().slice(0, 10);
       this.error = '';
-      this.success = '';
-      this.submitting = false;
-      this.availability = null;
-      this.refreshAvailability();
+      this.validateDates();
     }
   }
 
@@ -63,74 +53,50 @@ export class BookingModalComponent implements OnChanges {
     return this.car ? this.car.price * this.days : 0;
   }
 
-  readonly advanceAmount = 1000;
-
-  get remainingOffline(): number {
-    return Math.max(this.total - this.advanceAmount, 0);
+  get datesValid(): boolean {
+    return Boolean(
+      this.startDate &&
+        this.endDate &&
+        new Date(this.endDate) > new Date(this.startDate)
+    );
   }
 
-  get onlineAdvance(): number {
-    return Math.min(this.advanceAmount, this.total);
-  }
-
-  get canPay(): boolean {
-    return Boolean(this.availability?.available) && !this.checkingAvailability && !this.submitting;
+  get canSubmit(): boolean {
+    return (
+      Boolean(this.car?.available) &&
+      this.datesValid &&
+      getCarAvailability(this.car, this.startDate, this.endDate).available
+    );
   }
 
   close(): void {
-    if (this.submitting) {
-      return;
-    }
     this.closed.emit();
   }
 
   onDatesChange(): void {
-    this.refreshAvailability();
+    this.validateDates();
   }
 
-  refreshAvailability(): void {
-    if (!this.car || !this.startDate || !this.endDate) {
-      this.availability = null;
+  private validateDates(): void {
+    this.error = '';
+    this.dateAvailabilityMessage = '';
+
+    if (!this.startDate || !this.endDate) {
       return;
     }
+
     if (new Date(this.endDate) <= new Date(this.startDate)) {
-      this.availability = null;
       this.error = 'End date must be after start date.';
       return;
     }
 
-    this.checkingAvailability = true;
-    this.error = '';
-    this.bookingService.checkAvailability(this.car.id, this.startDate, this.endDate).subscribe({
-      next: (result) => {
-        this.availability = result;
-        this.checkingAvailability = false;
-        if (!result.available) {
-          this.error = 'No cars left for these dates. Try different dates.';
-        }
-      },
-      error: () => {
-        this.checkingAvailability = false;
-        this.availability = null;
-        this.error = 'Unable to check availability.';
-      },
-    });
-  }
-
-  private finishSuccess(message: string): void {
-    this.zone.run(() => {
-      this.submitting = false;
-      this.success = message;
-      this.booked.emit(message);
-    });
-  }
-
-  private finishError(message: string): void {
-    this.zone.run(() => {
-      this.submitting = false;
-      this.error = message;
-      this.refreshAvailability();
-    });
+    const availability = getCarAvailability(this.car, this.startDate, this.endDate);
+    if (!availability.available && availability.reason === 'blocked_period') {
+      this.dateAvailabilityMessage =
+        'This car is marked unavailable by admin for part of the selected dates.';
+    } else if (availability.available) {
+      this.dateAvailabilityMessage = 'Selected dates look available.';
+    }
   }
 
   submit(): void {
@@ -139,7 +105,11 @@ export class BookingModalComponent implements OnChanges {
     }
 
     this.error = '';
-    this.success = '';
+
+    if (!this.car.available) {
+      this.error = 'This car is not available for booking.';
+      return;
+    }
 
     if (!this.customerName.trim() || !this.customerEmail.trim() || !this.customerPhone.trim()) {
       this.error = 'Please fill name, email, and phone.';
@@ -153,103 +123,26 @@ export class BookingModalComponent implements OnChanges {
       this.error = 'End date must be after start date.';
       return;
     }
-    if (!this.availability?.available) {
-      this.error = 'No cars left for these dates.';
+
+    const availability = getCarAvailability(this.car, this.startDate, this.endDate);
+    if (!availability.available) {
+      this.error = 'This car is unavailable for the selected dates.';
       return;
     }
 
-    this.submitting = true;
+    const message = [
+      'Hi Zion Travels, I would like to book a car.',
+      '',
+      `Car: ${this.car.name} (${this.car.brand} · ${this.car.type})`,
+      `Dates: ${this.startDate} to ${this.endDate} (${this.days} day(s))`,
+      `Estimated total: ₹${this.total.toLocaleString('en-IN')}`,
+      '',
+      `Name: ${this.customerName.trim()}`,
+      `Email: ${this.customerEmail.trim()}`,
+      `Phone: ${this.customerPhone.trim()}`,
+    ].join('\n');
 
-    this.bookingService
-      .createOrder({
-        carId: this.car.id,
-        customerName: this.customerName.trim(),
-        customerEmail: this.customerEmail.trim(),
-        customerPhone: this.customerPhone.trim(),
-        startDate: this.startDate,
-        endDate: this.endDate,
-      })
-      .subscribe({
-        next: async (order) => {
-          try {
-            if (order.demoMode) {
-              this.bookingService
-                .verifyPayment({
-                  bookingId: order.bookingId,
-                  demoConfirm: true,
-                })
-                .subscribe({
-                  next: (result) => {
-                    const mailNote =
-                      result?.receiptEmailQueued || result?.receiptEmailSent
-                        ? ' A receipt will be emailed to you.'
-                        : '';
-                    this.finishSuccess(
-                      `Advance paid. Booking confirmed for ${order.carName}. Pay remaining balance offline.${mailNote}`
-                    );
-                  },
-                  error: (err) => {
-                    this.finishError(err?.error?.error || 'Could not confirm booking.');
-                  },
-                });
-              return;
-            }
-
-            await this.bookingService.loadRazorpayScript();
-            const rzp = new window.Razorpay({
-              key: order.keyId,
-              amount: order.amount,
-              currency: order.currency,
-              name: 'Zion Travels',
-              description: `${order.carName} · Advance ₹${order.advanceAmountInr}`,
-              order_id: order.orderId,
-              prefill: {
-                name: this.customerName.trim(),
-                email: this.customerEmail.trim(),
-                contact: this.customerPhone.trim(),
-              },
-              theme: { color: '#116dff' },
-              handler: (response: {
-                razorpay_order_id: string;
-                razorpay_payment_id: string;
-                razorpay_signature: string;
-              }) => {
-                this.bookingService
-                  .verifyPayment({
-                    bookingId: order.bookingId,
-                    razorpay_order_id: response.razorpay_order_id,
-                    razorpay_payment_id: response.razorpay_payment_id,
-                    razorpay_signature: response.razorpay_signature,
-                  })
-                  .subscribe({
-                    next: (result) => {
-                      const mailNote =
-                        result?.receiptEmailQueued || result?.receiptEmailSent
-                          ? ' A receipt will be emailed to you.'
-                          : '';
-                      this.finishSuccess(
-                        `Advance paid. Booking confirmed! Pay remaining balance offline.${mailNote}`
-                      );
-                    },
-                    error: (err) => {
-                      this.finishError(err?.error?.error || 'Payment verification failed.');
-                    },
-                  });
-              },
-              modal: {
-                ondismiss: () => {
-                  this.finishError('Payment cancelled.');
-                },
-              },
-            });
-            rzp.open();
-          } catch {
-            this.finishError('Unable to start Razorpay checkout.');
-          }
-        },
-        error: (err) => {
-          this.finishError(err?.error?.error || 'Failed to create booking order.');
-        },
-      });
+    window.open(buildWhatsAppUrl(message), '_blank', 'noopener,noreferrer');
+    this.booked.emit('Opening WhatsApp to complete your booking…');
   }
 }

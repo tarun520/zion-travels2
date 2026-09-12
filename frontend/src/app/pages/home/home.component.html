@@ -71,6 +71,8 @@
               <img [src]="car.image" [alt]="car.name" loading="lazy" />
               @if (!car.available) {
                 <span class="badge">Unavailable</span>
+              } @else if (isCurrentlyBlocked(car)) {
+                <span class="badge">Temporarily unavailable</span>
               }
             </div>
             <div class="body">

@@ -97,6 +97,47 @@
         <span>Available for booking</span>
       </label>
 
+      @if (editingId) {
+        <div class="unavailable-section">
+          <h3>Mark unavailable (date &amp; time)</h3>
+          <p class="section-note">Block this car for a specific period. Customers cannot book overlapping dates.</p>
+
+          <div class="period-form">
+            <label>
+              <span>Unavailable from</span>
+              <input type="datetime-local" name="periodStart" [(ngModel)]="periodStart" />
+            </label>
+            <label>
+              <span>Unavailable until</span>
+              <input type="datetime-local" name="periodEnd" [(ngModel)]="periodEnd" />
+            </label>
+            <label class="full">
+              <span>Note (optional)</span>
+              <input name="periodNote" [(ngModel)]="periodNote" placeholder="e.g. Maintenance, private booking" />
+            </label>
+            <button type="button" class="btn secondary" (click)="addUnavailablePeriod()">Add unavailability</button>
+          </div>
+
+          @if ((form.unavailablePeriods || []).length > 0) {
+            <ul class="period-list">
+              @for (period of form.unavailablePeriods; track period.id) {
+                <li>
+                  <div>
+                    <strong>{{ formatPeriodRange(period.startAt, period.endAt) }}</strong>
+                    @if (period.note) {
+                      <span class="period-note">{{ period.note }}</span>
+                    }
+                  </div>
+                  <button type="button" class="danger" (click)="removeUnavailablePeriod(period.id)">Remove</button>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="muted">No unavailability blocks yet.</p>
+          }
+        </div>
+      }
+
       <div class="actions">
         <button type="submit" class="btn primary" [disabled]="saving">
           {{ saving ? 'Saving…' : editingId ? 'Update car' : 'Add car' }}
@@ -122,6 +163,17 @@
               <div class="info">
                 <strong>{{ car.name }}</strong>
                 <span>{{ car.brand }} · {{ car.type }} · Qty {{ car.quantity || 1 }}</span>
+                <span class="status" [class.unavailable]="!car.available || isCurrentlyBlocked(car)">
+                  @if (!car.available) {
+                    Unavailable
+                  } @else if (isCurrentlyBlocked(car)) {
+                    Blocked now
+                  } @else if ((car.unavailablePeriods || []).length > 0) {
+                    {{ car.unavailablePeriods!.length }} block(s)
+                  } @else {
+                    Available
+                  }
+                </span>
                 <span class="price">{{ car.price | currency:'INR':'symbol':'1.0-0' }}/{{ car.priceUnit }}</span>
               </div>
               <div class="row-actions">

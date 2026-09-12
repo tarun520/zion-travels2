@@ -3,6 +3,7 @@ import { CurrencyPipe } from '@angular/common';
 import { Car } from '../../models/car.model';
 import { CarService } from '../../services/car.service';
 import { BookingModalComponent } from '../booking-modal/booking-modal.component';
+import { isCurrentlyBlocked } from '../../utils/availability.util';
 
 @Component({
   selector: 'app-home',
@@ -113,5 +114,9 @@ export class HomeComponent implements OnInit, AfterViewInit {
     if (this.successTimer) {
       clearTimeout(this.successTimer);
     }
+  }
+
+  isCurrentlyBlocked(car: Car): boolean {
+    return isCurrentlyBlocked(car);
   }
 }

@@ -1,8 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Car, CarInput } from '../../models/car.model';
+import { Car, CarInput, UnavailablePeriod } from '../../models/car.model';
 import { CarService } from '../../services/car.service';
+import {
+  formatPeriodRange,
+  fromDatetimeLocalValue,
+  isCurrentlyBlocked,
+} from '../../utils/availability.util';
 
 @Component({
   selector: 'app-admin',
@@ -20,6 +25,12 @@ export class AdminComponent implements OnInit {
   editingId: string | null = null;
 
   form: CarInput = this.emptyForm();
+  periodStart = '';
+  periodEnd = '';
+  periodNote = '';
+
+  readonly formatPeriodRange = formatPeriodRange;
+  readonly isCurrentlyBlocked = isCurrentlyBlocked;
 
   constructor(private carService: CarService) {}
 
@@ -41,6 +52,7 @@ export class AdminComponent implements OnInit {
       image: '',
       description: '',
       available: true,
+      unavailablePeriods: [],
     };
   }
 
@@ -74,7 +86,11 @@ export class AdminComponent implements OnInit {
       image: car.image,
       description: car.description,
       available: car.available,
+      unavailablePeriods: [...(car.unavailablePeriods || [])],
     };
+    this.periodStart = '';
+    this.periodEnd = '';
+    this.periodNote = '';
     this.success = '';
     this.error = '';
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -83,6 +99,43 @@ export class AdminComponent implements OnInit {
   cancelEdit(): void {
     this.editingId = null;
     this.form = this.emptyForm();
+    this.periodStart = '';
+    this.periodEnd = '';
+    this.periodNote = '';
+  }
+
+  addUnavailablePeriod(): void {
+    this.error = '';
+
+    if (!this.periodStart || !this.periodEnd) {
+      this.error = 'Select both start and end date/time for unavailability.';
+      return;
+    }
+
+    const startAt = fromDatetimeLocalValue(this.periodStart);
+    const endAt = fromDatetimeLocalValue(this.periodEnd);
+    if (new Date(endAt) <= new Date(startAt)) {
+      this.error = 'End date/time must be after start date/time.';
+      return;
+    }
+
+    const period: UnavailablePeriod = {
+      id: crypto.randomUUID(),
+      startAt,
+      endAt,
+      note: this.periodNote.trim(),
+    };
+
+    this.form.unavailablePeriods = [...(this.form.unavailablePeriods || []), period];
+    this.periodStart = '';
+    this.periodEnd = '';
+    this.periodNote = '';
+  }
+
+  removeUnavailablePeriod(periodId: string): void {
+    this.form.unavailablePeriods = (this.form.unavailablePeriods || []).filter(
+      (period) => period.id !== periodId
+    );
   }
 
   submit(): void {
@@ -113,6 +166,7 @@ export class AdminComponent implements OnInit {
       price: Number(this.form.price),
       seats: Number(this.form.seats) || 5,
       quantity: Math.floor(Number(this.form.quantity)) || 1,
+      unavailablePeriods: this.form.unavailablePeriods || [],
     };
 
     this.saving = true;
@@ -127,6 +181,9 @@ export class AdminComponent implements OnInit {
         this.success = this.editingId ? 'Car updated.' : 'Car added.';
         this.editingId = null;
         this.form = this.emptyForm();
+        this.periodStart = '';
+        this.periodEnd = '';
+        this.periodNote = '';
         this.loadCars();
       },
       error: (err) => {

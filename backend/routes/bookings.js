@@ -64,8 +64,8 @@ router.get('/', (_req, res) => {
 router.get('/availability', (req, res) => {
   try {
     const { carId, startDate, endDate } = req.query;
-    if (!carId || !startDate || !endDate) {
-      return res.status(400).json({ error: 'carId, startDate, and endDate are required' });
+    if (!carId) {
+      return res.status(400).json({ error: 'carId is required' });
     }
 
     const cars = readJson(carsPath);
@@ -74,11 +74,16 @@ router.get('/availability', (req, res) => {
       return res.status(404).json({ error: 'Car not found' });
     }
 
-    const availability = getAvailability(car, String(startDate), String(endDate));
+    const availability = getAvailability(
+      car,
+      startDate ? String(startDate) : null,
+      endDate ? String(endDate) : null
+    );
+
     res.json({
       carId: car.id,
-      startDate,
-      endDate,
+      startDate: startDate || null,
+      endDate: endDate || null,
       ...availability,
     });
   } catch (err) {
@@ -118,7 +123,7 @@ router.post('/create-order', async (req, res) => {
     const availability = getAvailability(car, startDate, endDate);
     if (!availability.available) {
       return res.status(409).json({
-        error: 'No cars left for the selected dates',
+        error: 'Car is unavailable for the selected dates',
         ...availability,
       });
     }
@@ -203,7 +208,6 @@ router.post('/create-order', async (req, res) => {
       totalAmountInr,
       advanceAmountInr,
       remainingAmountInr,
-      remainingAfterHold: availability.remaining - 1,
     });
   } catch (err) {
     console.error('create-order failed', err);
@@ -283,13 +287,14 @@ router.post('/verify', async (req, res) => {
       writeBookings(bookings);
       return res.status(400).json({ error: 'Car is no longer available' });
     }
-    const availability = getAvailability(car, booking.startDate, booking.endDate, booking.id);
+
+    const availability = getAvailability(car, booking.startDate, booking.endDate);
     if (!availability.available) {
       booking.status = 'failed';
       bookings[index] = booking;
       writeBookings(bookings);
       return res.status(409).json({
-        error: 'No cars left for these dates. Another booking took the last unit.',
+        error: 'Car is unavailable for the selected dates',
         ...availability,
       });
     }
