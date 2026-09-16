@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Car, CarInput } from '../models/car.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CarService {
-  private readonly apiUrl = 'https://zion-travels-backend-2.onrender.com/api/cars';
+  private readonly apiUrl = `${environment.apiBaseUrl}/cars`;
 
   constructor(private http: HttpClient) {}
 
