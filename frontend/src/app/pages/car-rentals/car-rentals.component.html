@@ -1,0 +1,68 @@
+<section class="car-rentals-page">
+  <div class="wrap">
+    <div class="page-head">
+      <a routerLink="/" class="back-link">← Back to services</a>
+      <h1>{{ pageTitle }}</h1>
+      <p>{{ pageSubtitle }}</p>
+    </div>
+
+    @if (loading) {
+      <p class="status">Loading…</p>
+    } @else if (error) {
+      <p class="status error">{{ error }}</p>
+    } @else if (cars.length === 0) {
+      <p class="status">
+        No {{ serviceCategory === 'bus-rental' ? 'buses' : 'cars' }} yet for this service. Add them from Admin.
+      </p>
+    } @else {
+      <div class="fleet-grid">
+        @for (car of cars; track car.id) {
+          <article class="fleet-card">
+            <div class="thumb">
+              <img [src]="car.image" [alt]="car.name" loading="lazy" />
+              @if (serviceCategory === 'bus-rental') {
+                <span class="badge seats-badge">{{ car.seats }} seats</span>
+              }
+              @if (!car.available) {
+                <span class="badge" [class.offset]="serviceCategory === 'bus-rental'">Unavailable</span>
+              } @else if (isCurrentlyBlocked(car)) {
+                <span class="badge" [class.offset]="serviceCategory === 'bus-rental'">Temporarily unavailable</span>
+              }
+            </div>
+            <div class="body">
+              <h2>{{ car.name }}</h2>
+              @if (serviceCategory === 'bus-rental') {
+                <p class="meta seats-meta">{{ car.seats }} seats · Qty {{ car.quantity || 1 }}</p>
+              } @else {
+                <p class="meta">{{ car.brand }} · {{ car.type }} · {{ car.seats }} seats · Qty {{ car.quantity || 1 }}</p>
+              }
+              <p class="price">{{ car.price | currency:'INR':'symbol':'1.0-0' }}<span>/{{ car.priceUnit }}</span></p>
+              <button
+                class="book-car-btn"
+                type="button"
+                [disabled]="!car.available"
+                (click)="openBooking(car)"
+              >
+                {{ car.available ? 'Book Now' : 'Unavailable' }}
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </div>
+</section>
+
+<app-booking-modal
+  [open]="bookingOpen"
+  [car]="selectedCar"
+  (closed)="closeBooking()"
+  (booked)="onBooked($event)"
+/>
+
+@if (bookingSuccess) {
+  <div class="booking-toast" role="status">
+    <p>{{ bookingSuccess }}</p>
+    <button type="button" (click)="dismissSuccess()" aria-label="Dismiss">×</button>
+  </div>
+}

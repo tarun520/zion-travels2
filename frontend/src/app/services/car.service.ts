@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Car, CarInput } from '../models/car.model';
+import { Car, CarInput, ServiceCategory } from '../models/car.model';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -12,8 +12,12 @@ export class CarService {
 
   constructor(private http: HttpClient) {}
 
-  getCars(): Observable<Car[]> {
-    return this.http.get<Car[]>(this.apiUrl);
+  getCars(serviceCategory?: ServiceCategory): Observable<Car[]> {
+    let params = new HttpParams();
+    if (serviceCategory) {
+      params = params.set('serviceCategory', serviceCategory);
+    }
+    return this.http.get<Car[]>(this.apiUrl, { params });
   }
 
   getCar(id: string): Observable<Car> {

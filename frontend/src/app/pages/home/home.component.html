@@ -27,7 +27,7 @@
       Let Zion Travels transform your travel experience with our top-notch rental services,
       ensuring comfort and reliability through every journey.
     </p>
-    <a class="cta-red" href="#fleet">Rent Now</a>
+    <a class="cta-red" href="#services">Explore Services</a>
   </div>
 </section>
 
@@ -36,11 +36,11 @@
     <div class="about-copy reveal">
       <h2>Who We Are</h2>
       <p>
-        Zion Travels is dedicated to providing high-quality car rental services tailored for
+        Zion Travels is dedicated to providing high-quality travel services tailored for
         tourists and locals alike.
       </p>
       <p>
-        We specialize in clean, well-maintained vehicles operated by professional drivers.
+        We specialize in clean, well-maintained vehicles and professional chauffeur support.
       </p>
     </div>
     <div class="about-media reveal">
@@ -50,64 +50,55 @@
   </div>
 </section>
 
-<section id="fleet" class="fleet">
+<section id="services" class="services">
   <div class="wrap">
     <div class="section-head reveal">
-      <h2>Our Cars</h2>
-      <p>Cars added from Admin — with live prices</p>
+      <h2>Our Services</h2>
+      <p>Reliable travel solutions for every journey</p>
     </div>
 
-    @if (loading) {
-      <p class="status">Loading cars…</p>
-    } @else if (error) {
-      <p class="status error">{{ error }}</p>
-    } @else if (cars.length === 0) {
-      <p class="status">No cars yet. Add cars from Admin.</p>
-    } @else {
-      <div class="fleet-grid">
-        @for (car of cars; track car.id) {
-          <article class="fleet-card">
-            <div class="thumb">
-              <img [src]="car.image" [alt]="car.name" loading="lazy" />
-              @if (!car.available) {
-                <span class="badge">Unavailable</span>
-              } @else if (isCurrentlyBlocked(car)) {
-                <span class="badge">Temporarily unavailable</span>
-              }
-            </div>
-            <div class="body">
-              <h3>{{ car.name }}</h3>
-              <p class="meta">{{ car.brand }} · {{ car.type }} · {{ car.seats }} seats · Qty {{ car.quantity || 1 }}</p>
-              <p class="price">{{ car.price | currency:'INR':'symbol':'1.0-0' }}<span>/{{ car.priceUnit }}</span></p>
-              <button
-                class="book-car-btn"
-                type="button"
-                [disabled]="!car.available"
-                (click)="openBooking(car)"
-              >
-                {{ car.available ? 'Book Now' : 'Unavailable' }}
-              </button>
-            </div>
-          </article>
-        }
-      </div>
-    }
+    <div class="services-grid">
+      @for (service of services; track service.id) {
+        <article
+          class="service-item reveal"
+          [class.clickable]="
+            service.action === 'cars' || service.action === 'chauffeur' || service.action === 'bus'
+          "
+          (click)="
+            service.action === 'cars'
+              ? openCarRentals()
+              : service.action === 'chauffeur'
+                ? openChauffeurService()
+                : service.action === 'bus'
+                  ? openBusRentals()
+                  : null
+          "
+        >
+          <div class="service-media">
+            <img [src]="service.image" [alt]="service.title" loading="lazy" />
+          </div>
+          <div class="service-copy">
+            <h3>{{ service.title }}</h3>
+            <p>{{ service.description }}</p>
+            <button
+              class="service-btn"
+              type="button"
+              (click)="onServiceClick(service); $event.stopPropagation()"
+            >
+              {{
+                service.action === 'bus'
+                  ? 'View Buses'
+                  : service.action === 'cars' || service.action === 'chauffeur'
+                    ? 'View Cars'
+                    : 'Enquire on WhatsApp'
+              }}
+            </button>
+          </div>
+        </article>
+      }
+    </div>
   </div>
 </section>
-
-<app-booking-modal
-  [open]="bookingOpen"
-  [car]="selectedCar"
-  (closed)="closeBooking()"
-  (booked)="onBooked($event)"
-/>
-
-@if (bookingSuccess) {
-  <div class="booking-toast" role="status">
-    <p>{{ bookingSuccess }}</p>
-    <button type="button" (click)="dismissSuccess()" aria-label="Dismiss">×</button>
-  </div>
-}
 
 <footer class="site-footer">
   <div class="wrap footer-grid">

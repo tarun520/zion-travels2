@@ -1,38 +1,58 @@
-import { Component, OnInit, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
-import { CurrencyPipe } from '@angular/common';
-import { Car } from '../../models/car.model';
-import { CarService } from '../../services/car.service';
-import { BookingModalComponent } from '../booking-modal/booking-modal.component';
-import { isCurrentlyBlocked } from '../../utils/availability.util';
+import { Component, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
+import { buildWhatsAppUrl } from '../../config/contact.config';
+
+export interface HomeService {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  action: 'cars' | 'chauffeur' | 'bus' | 'whatsapp';
+}
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CurrencyPipe, BookingModalComponent],
+  imports: [],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
 })
-export class HomeComponent implements OnInit, AfterViewInit {
+export class HomeComponent implements AfterViewInit {
   @ViewChild('heroVideo') heroVideo?: ElementRef<HTMLVideoElement>;
 
-  cars: Car[] = [];
-  loading = true;
-  error = '';
-  selectedCar: Car | null = null;
-  bookingOpen = false;
-  bookingSuccess = '';
-  private successTimer?: ReturnType<typeof setTimeout>;
+  services: HomeService[] = [
+    {
+      id: 'car-rentals',
+      title: 'Car Rentals',
+      description:
+        'Self-drive and flexible car hire for city trips, weekends, and outstation travel — clean vehicles ready when you are.',
+      image: '/wix/car1-lg.jpg',
+      action: 'cars',
+    },
+    {
+      id: 'chauffeur-service',
+      title: 'Chauffeur Service',
+      description:
+        'Professional drivers for airport transfers, business travel, and day-long city rides with comfort and punctuality.',
+      image: '/wix/car2-lg.jpg',
+      action: 'chauffeur',
+    },
+    {
+      id: 'bus-rentals',
+      title: 'Bus Rentals',
+      description:
+        'Group travel made easy — buses for weddings, corporate outings, tours, and events with dependable service.',
+      image: '/wix/banner.jpg',
+      action: 'bus',
+    },
+  ];
 
   private revealObserver?: IntersectionObserver;
 
   constructor(
-    private carService: CarService,
-    private host: ElementRef<HTMLElement>
+    private host: ElementRef<HTMLElement>,
+    private router: Router
   ) {}
-
-  ngOnInit(): void {
-    this.loadCars();
-  }
 
   ngAfterViewInit(): void {
     const video = this.heroVideo?.nativeElement;
@@ -69,54 +89,40 @@ export class HomeComponent implements OnInit, AfterViewInit {
     nodes.forEach((node) => this.revealObserver!.observe(node));
   }
 
-  loadCars(): void {
-    this.loading = true;
-    this.error = '';
-    this.carService.getCars().subscribe({
-      next: (cars) => {
-        this.cars = cars;
-        this.loading = false;
-        setTimeout(() => this.observeReveals(), 0);
-      },
-      error: () => {
-        this.error = 'Unable to load fleet.';
-        this.loading = false;
-      },
-    });
-  }
-
-  openBooking(car: Car): void {
-    if (!car.available) {
+  onServiceClick(service: HomeService): void {
+    if (service.action === 'cars') {
+      this.router.navigate(['/car-rentals']);
       return;
     }
-    this.selectedCar = car;
-    this.bookingOpen = true;
-  }
-
-  closeBooking(): void {
-    this.bookingOpen = false;
-    this.selectedCar = null;
-  }
-
-  onBooked(message: string): void {
-    this.closeBooking();
-    this.bookingSuccess = message;
-    if (this.successTimer) {
-      clearTimeout(this.successTimer);
+    if (service.action === 'chauffeur') {
+      this.router.navigate(['/chauffeur-service']);
+      return;
     }
-    this.successTimer = setTimeout(() => {
-      this.bookingSuccess = '';
-    }, 5000);
-  }
-
-  dismissSuccess(): void {
-    this.bookingSuccess = '';
-    if (this.successTimer) {
-      clearTimeout(this.successTimer);
+    if (service.action === 'bus') {
+      this.router.navigate(['/bus-rentals']);
+      return;
     }
+    this.enquire(service);
   }
 
-  isCurrentlyBlocked(car: Car): boolean {
-    return isCurrentlyBlocked(car);
+  openCarRentals(): void {
+    this.router.navigate(['/car-rentals']);
+  }
+
+  openChauffeurService(): void {
+    this.router.navigate(['/chauffeur-service']);
+  }
+
+  openBusRentals(): void {
+    this.router.navigate(['/bus-rentals']);
+  }
+
+  enquire(service: HomeService): void {
+    const message = [
+      `Hi Zion Travels, I'm interested in your ${service.title} service.`,
+      '',
+      'Please share availability and pricing.',
+    ].join('\n');
+    window.open(buildWhatsAppUrl(message), '_blank', 'noopener,noreferrer');
   }
 }

@@ -2,12 +2,12 @@
   <div class="admin-hero">
     <p class="eyebrow">Zion Travels</p>
     <h1>Fleet admin</h1>
-    <p class="lede">Add cars and set daily prices for the portfolio section.</p>
+    <p class="lede">Add cars for Car Rentals or Chauffeur Service and manage prices.</p>
   </div>
 
   <div class="admin-layout">
     <form class="car-form" (ngSubmit)="submit()" #carForm="ngForm">
-      <h2>{{ editingId ? 'Edit car' : 'Add a car' }}</h2>
+      <h2>{{ form.serviceCategory === 'bus-rental' ? (editingId ? 'Edit bus' : 'Add a bus') : editingId ? 'Edit car' : 'Add a car' }}</h2>
 
       @if (error) {
         <p class="banner error">{{ error }}</p>
@@ -18,8 +18,13 @@
 
       <div class="field-grid">
         <label>
-          <span>Car name *</span>
-          <input name="name" [(ngModel)]="form.name" required placeholder="e.g. Toyota Innova Crysta" />
+          <span>{{ form.serviceCategory === 'bus-rental' ? 'Bus name *' : 'Car name *' }}</span>
+          <input
+            name="name"
+            [(ngModel)]="form.name"
+            required
+            [placeholder]="form.serviceCategory === 'bus-rental' ? 'e.g. Tempo Traveller 12 Seater' : 'e.g. Toyota Innova Crysta'"
+          />
         </label>
 
         <label>
@@ -33,6 +38,15 @@
         </label>
 
         <label>
+          <span>Service *</span>
+          <select name="serviceCategory" [(ngModel)]="form.serviceCategory" required>
+            <option value="car-rental">Car Rentals</option>
+            <option value="chauffeur">Chauffeur Service</option>
+            <option value="bus-rental">Bus Rentals</option>
+          </select>
+        </label>
+
+        <label>
           <span>Type</span>
           <select name="type" [(ngModel)]="form.type">
             <option>Sedan</option>
@@ -40,6 +54,8 @@
             <option>Hatchback</option>
             <option>MUV</option>
             <option>Luxury</option>
+            <option>Mini Bus</option>
+            <option>Bus</option>
           </select>
         </label>
 
@@ -53,8 +69,15 @@
         </label>
 
         <label>
-          <span>Seats</span>
-          <input name="seats" type="number" min="2" max="20" [(ngModel)]="form.seats" />
+          <span>{{ form.serviceCategory === 'bus-rental' ? 'No. of seats *' : 'Seats' }}</span>
+          <input
+            name="seats"
+            type="number"
+            min="2"
+            max="100"
+            [(ngModel)]="form.seats"
+            [required]="form.serviceCategory === 'bus-rental'"
+          />
         </label>
 
         <label>
@@ -140,7 +163,17 @@
 
       <div class="actions">
         <button type="submit" class="btn primary" [disabled]="saving">
-          {{ saving ? 'Saving…' : editingId ? 'Update car' : 'Add car' }}
+          {{
+            saving
+              ? 'Saving…'
+              : editingId
+                ? form.serviceCategory === 'bus-rental'
+                  ? 'Update bus'
+                  : 'Update car'
+                : form.serviceCategory === 'bus-rental'
+                  ? 'Add bus'
+                  : 'Add car'
+          }}
         </button>
         @if (editingId) {
           <button type="button" class="btn secondary" (click)="cancelEdit()">Cancel</button>
@@ -151,18 +184,38 @@
     <div class="inventory">
       <h2>Current fleet</h2>
 
+      <div class="filter-tabs">
+        <button type="button" [class.active]="listFilter === 'all'" (click)="listFilter = 'all'">All</button>
+        <button type="button" [class.active]="listFilter === 'car-rental'" (click)="listFilter = 'car-rental'">
+          Car Rentals
+        </button>
+        <button type="button" [class.active]="listFilter === 'chauffeur'" (click)="listFilter = 'chauffeur'">
+          Chauffeur
+        </button>
+        <button type="button" [class.active]="listFilter === 'bus-rental'" (click)="listFilter = 'bus-rental'">
+          Bus Rentals
+        </button>
+      </div>
+
       @if (loading) {
         <p class="muted">Loading…</p>
-      } @else if (cars.length === 0) {
-        <p class="muted">No cars yet. Use the form to add one.</p>
+      } @else if (filteredCars.length === 0) {
+        <p class="muted">No cars in this category yet.</p>
       } @else {
         <ul class="car-list">
-          @for (car of cars; track car.id) {
+          @for (car of filteredCars; track car.id) {
             <li>
               <img [src]="car.image" [alt]="car.name" />
               <div class="info">
                 <strong>{{ car.name }}</strong>
-                <span>{{ car.brand }} · {{ car.type }} · Qty {{ car.quantity || 1 }}</span>
+                <span class="category-tag">{{ serviceCategoryLabel(car.serviceCategory) }}</span>
+                <span>
+                  @if ((car.serviceCategory || 'car-rental') === 'bus-rental') {
+                    {{ car.seats }} seats · Qty {{ car.quantity || 1 }}
+                  } @else {
+                    {{ car.brand }} · {{ car.type }} · Qty {{ car.quantity || 1 }}
+                  }
+                </span>
                 <span class="status" [class.unavailable]="!car.available || isCurrentlyBlocked(car)">
                   @if (!car.available) {
                     Unavailable

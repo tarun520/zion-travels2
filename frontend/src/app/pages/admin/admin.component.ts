@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Car, CarInput, UnavailablePeriod } from '../../models/car.model';
+import { Car, CarInput, UnavailablePeriod, serviceCategoryLabel } from '../../models/car.model';
 import { CarService } from '../../services/car.service';
 import {
   formatPeriodRange,
@@ -31,6 +31,8 @@ export class AdminComponent implements OnInit {
 
   readonly formatPeriodRange = formatPeriodRange;
   readonly isCurrentlyBlocked = isCurrentlyBlocked;
+  readonly serviceCategoryLabel = serviceCategoryLabel;
+  listFilter: 'all' | 'car-rental' | 'chauffeur' | 'bus-rental' = 'all';
 
   constructor(private carService: CarService) {}
 
@@ -52,6 +54,7 @@ export class AdminComponent implements OnInit {
       image: '',
       description: '',
       available: true,
+      serviceCategory: 'car-rental',
       unavailablePeriods: [],
     };
   }
@@ -71,6 +74,13 @@ export class AdminComponent implements OnInit {
     });
   }
 
+  get filteredCars(): Car[] {
+    if (this.listFilter === 'all') {
+      return this.cars;
+    }
+    return this.cars.filter((car) => (car.serviceCategory || 'car-rental') === this.listFilter);
+  }
+
   startEdit(car: Car): void {
     this.editingId = car.id;
     this.form = {
@@ -86,6 +96,7 @@ export class AdminComponent implements OnInit {
       image: car.image,
       description: car.description,
       available: car.available,
+      serviceCategory: car.serviceCategory || 'car-rental',
       unavailablePeriods: [...(car.unavailablePeriods || [])],
     };
     this.periodStart = '';
@@ -154,6 +165,10 @@ export class AdminComponent implements OnInit {
       this.error = 'Quantity must be at least 1.';
       return;
     }
+    if (this.form.serviceCategory === 'bus-rental' && (!this.form.seats || Number(this.form.seats) < 2)) {
+      this.error = 'Enter number of seats for the bus.';
+      return;
+    }
 
     const payload: CarInput = {
       ...this.form,
@@ -166,6 +181,7 @@ export class AdminComponent implements OnInit {
       price: Number(this.form.price),
       seats: Number(this.form.seats) || 5,
       quantity: Math.floor(Number(this.form.quantity)) || 1,
+      serviceCategory: this.form.serviceCategory || 'car-rental',
       unavailablePeriods: this.form.unavailablePeriods || [],
     };
 
@@ -178,7 +194,13 @@ export class AdminComponent implements OnInit {
     request$.subscribe({
       next: () => {
         this.saving = false;
-        this.success = this.editingId ? 'Car updated.' : 'Car added.';
+        this.success = this.editingId
+          ? this.form.serviceCategory === 'bus-rental'
+            ? 'Bus updated.'
+            : 'Car updated.'
+          : this.form.serviceCategory === 'bus-rental'
+            ? 'Bus added.'
+            : 'Car added.';
         this.editingId = null;
         this.form = this.emptyForm();
         this.periodStart = '';

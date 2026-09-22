@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core
 import { CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { buildWhatsAppUrl } from '../../config/contact.config';
-import { Car } from '../../models/car.model';
+import { Car, serviceCategoryLabel } from '../../models/car.model';
 import { getCarAvailability } from '../../utils/availability.util';
 
 @Component({
@@ -130,10 +130,13 @@ export class BookingModalComponent implements OnChanges {
       return;
     }
 
+    const vehicleLabel = this.car.serviceCategory === 'bus-rental' ? 'Bus' : 'Car';
+    const serviceLabel = serviceCategoryLabel(this.car.serviceCategory);
     const message = [
-      'Hi Zion Travels, I would like to book a car.',
+      `Hi Zion Travels, I would like to book via ${serviceLabel}.`,
       '',
-      `Car: ${this.car.name} (${this.car.brand} · ${this.car.type})`,
+      `Service: ${serviceLabel}`,
+      `${vehicleLabel}: ${this.car.name}${this.car.serviceCategory === 'bus-rental' ? ` (${this.car.seats} seats)` : ` (${this.car.brand} · ${this.car.type})`}`,
       `Dates: ${this.startDate} to ${this.endDate} (${this.days} day(s))`,
       `Estimated total: ₹${this.total.toLocaleString('en-IN')}`,
       '',

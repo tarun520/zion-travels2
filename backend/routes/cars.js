@@ -35,16 +35,33 @@ function sanitizeUnavailablePeriods(periods) {
     });
 }
 
+function sanitizeServiceCategory(value) {
+  if (value === 'chauffeur') {
+    return 'chauffeur';
+  }
+  if (value === 'bus-rental') {
+    return 'bus-rental';
+  }
+  return 'car-rental';
+}
+
 function normalizeCar(car) {
   return {
     ...car,
+    serviceCategory: sanitizeServiceCategory(car?.serviceCategory),
     unavailablePeriods: sanitizeUnavailablePeriods(normalizePeriods(car)),
   };
 }
 
-router.get('/', (_req, res) => {
+router.get('/', (req, res) => {
   try {
-    res.json(readCars().map(normalizeCar));
+    let cars = readCars().map(normalizeCar);
+    const { serviceCategory } = req.query;
+    if (serviceCategory) {
+      const category = sanitizeServiceCategory(String(serviceCategory));
+      cars = cars.filter((car) => car.serviceCategory === category);
+    }
+    res.json(cars);
   } catch (err) {
     res.status(500).json({ error: 'Failed to load cars' });
   }
@@ -77,6 +94,7 @@ router.post('/', (req, res) => {
       image,
       description,
       available = true,
+      serviceCategory = 'car-rental',
       unavailablePeriods = [],
     } = req.body;
 
@@ -109,6 +127,7 @@ router.post('/', (req, res) => {
       image: image || 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800&q=80',
       description: description ? String(description).trim() : '',
       available: Boolean(available),
+      serviceCategory: sanitizeServiceCategory(serviceCategory),
       unavailablePeriods: sanitizeUnavailablePeriods(unavailablePeriods),
     };
 
@@ -154,6 +173,10 @@ router.put('/:id', (req, res) => {
 
     if (updates.available !== undefined) {
       updates.available = Boolean(updates.available);
+    }
+
+    if (updates.serviceCategory !== undefined) {
+      updates.serviceCategory = sanitizeServiceCategory(updates.serviceCategory);
     }
 
     if (updates.unavailablePeriods !== undefined) {

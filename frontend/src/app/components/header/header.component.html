@@ -8,10 +8,11 @@
 
     <nav class="nav" [class.show]="menuOpen">
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">Home</a>
-      <a href="#fleet" (click)="closeMenu()">Cars</a>
+      <a href="#services" (click)="closeMenu()">Services</a>
+      <!-- <a routerLink="/car-rentals" routerLinkActive="active" (click)="closeMenu()">Cars</a> -->
       <a href="#about" (click)="closeMenu()">About</a>
-      <a routerLink="/admin" routerLinkActive="active" (click)="closeMenu()">Admin</a>
-      <a class="book-btn" href="#fleet" (click)="closeMenu()">Book</a>
+      <!-- <a routerLink="/admin" routerLinkActive="active" (click)="closeMenu()">Admin</a> -->
+      <a class="book-btn" routerLink="/car-rentals" (click)="closeMenu()">Book</a>
     </nav>
   </div>
 </header>
