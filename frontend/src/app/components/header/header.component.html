@@ -1,6 +1,9 @@
 <header class="wix-header" [class.open]="menuOpen">
   <div class="inner">
-    <a routerLink="/" class="logo" (click)="closeMenu()">Zion Travels</a>
+    <a routerLink="/" class="logo" (click)="closeMenu()" aria-label="Zion Travels home">
+      <img src="/zion-logo.jpg" alt="Zion Travels" class="logo-mark" />
+      <span class="logo-text">Zion Travels</span>
+    </a>
 
     <button class="menu-toggle" type="button" aria-label="Toggle menu" (click)="toggleMenu()">
       <span></span><span></span><span></span>

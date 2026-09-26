@@ -18,11 +18,27 @@
 }
 
 .logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
   font-size: 1.35rem;
   font-weight: 800;
   letter-spacing: -0.02em;
   color: var(--wix-black);
   text-decoration: none;
+}
+
+.logo-mark {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: #fff;
+}
+
+.logo-text {
+  line-height: 1;
 }
 
 .nav {
