@@ -7,7 +7,7 @@ export interface HomeService {
   title: string;
   description: string;
   image: string;
-  action: 'cars' | 'chauffeur' | 'bus' | 'whatsapp';
+  action: 'cars' | 'whatsapp';
 }
 
 @Component({
@@ -35,7 +35,7 @@ export class HomeComponent implements AfterViewInit {
       description:
         'Professional drivers for airport transfers, business travel, and day-long city rides with comfort and punctuality.',
       image: '/wix/car2-lg.jpg',
-      action: 'chauffeur',
+      action: 'whatsapp',
     },
     {
       id: 'bus-rentals',
@@ -43,7 +43,7 @@ export class HomeComponent implements AfterViewInit {
       description:
         'Group travel made easy — buses for weddings, corporate outings, tours, and events with dependable service.',
       image: '/wix/banner.jpg',
-      action: 'bus',
+      action: 'whatsapp',
     },
   ];
 
@@ -94,27 +94,11 @@ export class HomeComponent implements AfterViewInit {
       this.router.navigate(['/car-rentals']);
       return;
     }
-    if (service.action === 'chauffeur') {
-      this.router.navigate(['/chauffeur-service']);
-      return;
-    }
-    if (service.action === 'bus') {
-      this.router.navigate(['/bus-rentals']);
-      return;
-    }
     this.enquire(service);
   }
 
   openCarRentals(): void {
     this.router.navigate(['/car-rentals']);
-  }
-
-  openChauffeurService(): void {
-    this.router.navigate(['/chauffeur-service']);
-  }
-
-  openBusRentals(): void {
-    this.router.navigate(['/bus-rentals']);
   }
 
   enquire(service: HomeService): void {

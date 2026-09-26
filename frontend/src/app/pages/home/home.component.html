@@ -61,18 +61,8 @@
       @for (service of services; track service.id) {
         <article
           class="service-item reveal"
-          [class.clickable]="
-            service.action === 'cars' || service.action === 'chauffeur' || service.action === 'bus'
-          "
-          (click)="
-            service.action === 'cars'
-              ? openCarRentals()
-              : service.action === 'chauffeur'
-                ? openChauffeurService()
-                : service.action === 'bus'
-                  ? openBusRentals()
-                  : null
-          "
+          [class.clickable]="service.action === 'cars'"
+          (click)="service.action === 'cars' ? openCarRentals() : null"
         >
           <div class="service-media">
             <img [src]="service.image" [alt]="service.title" loading="lazy" />
@@ -85,13 +75,7 @@
               type="button"
               (click)="onServiceClick(service); $event.stopPropagation()"
             >
-              {{
-                service.action === 'bus'
-                  ? 'View Buses'
-                  : service.action === 'cars' || service.action === 'chauffeur'
-                    ? 'View Cars'
-                    : 'Enquire on WhatsApp'
-              }}
+              {{ service.action === 'cars' ? 'View Cars' : 'Enquire on WhatsApp' }}
             </button>
           </div>
         </article>
