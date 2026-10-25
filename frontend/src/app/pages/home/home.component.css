@@ -18,7 +18,7 @@
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background: #111 url('/wix/banner.jpg') center / cover no-repeat;
+  background: #111 center / cover no-repeat;
 }
 
 .hero-video {
@@ -77,21 +77,44 @@
   animation: fade-up 0.9s ease 0.35s both;
 }
 
-.cta-red {
-  display: inline-flex;
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
   margin-top: 1.6rem;
-  padding: 0.85rem 1.6rem;
-  background: var(--wix-red);
+  animation: fade-up 0.9s ease 0.5s both;
+}
+
+.cta-red,
+.cta-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem 1.4rem;
   color: #fff;
   text-decoration: none;
   font-weight: 700;
   border-radius: 999px;
-  transition: background 0.2s ease, transform 0.2s ease;
-  animation: fade-up 0.9s ease 0.5s both;
+  transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.cta-red {
+  background: var(--wix-red);
 }
 
 .cta-red:hover {
   background: var(--wix-red-hover);
+  transform: translateY(-1px);
+}
+
+.cta-ghost {
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.cta-ghost:hover {
+  background: rgba(0, 0, 0, 0.45);
   transform: translateY(-1px);
 }
 
@@ -241,6 +264,66 @@
   cursor: pointer;
 }
 
+.contact {
+  padding: 0 0 4.5rem;
+  background: #fff;
+}
+
+.contact-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.6rem 1.75rem;
+  border: 1px solid var(--wix-border);
+  background: var(--wix-light-gray);
+}
+
+.contact-panel h2 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.contact-panel p {
+  margin: 0.4rem 0 0;
+  color: var(--wix-gray);
+}
+
+.contact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.contact-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 160px;
+  padding: 0.8rem 1.2rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 700;
+  color: #fff;
+}
+
+.contact-btn.call {
+  background: var(--wix-blue);
+}
+
+.contact-btn.call:hover {
+  background: var(--wix-blue-hover);
+}
+
+.contact-btn.maps {
+  background: #0f6b36;
+}
+
+.contact-btn.maps:hover {
+  background: #0c552b;
+}
+
 .site-footer {
   background: var(--wix-footer);
   color: rgba(255, 255, 255, 0.88);
@@ -264,6 +347,16 @@
   margin: 0.2rem 0;
   line-height: 1.5;
   font-size: 0.95rem;
+}
+
+.site-footer a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.site-footer a:hover {
+  color: #fff;
+  text-decoration: underline;
 }
 
 .footer-bottom {
@@ -378,6 +471,11 @@
   .footer-grid,
   .services-grid {
     grid-template-columns: 1fr;
+  }
+
+  .contact-panel {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .about-media {

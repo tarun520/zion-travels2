@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Car, CarInput, UnavailablePeriod, serviceCategoryLabel } from '../../models/car.model';
+import { defaultSiteAssets, SiteAssets } from '../../models/site-assets.model';
 import { CarService } from '../../services/car.service';
+import { SiteAssetsService } from '../../services/site-assets.service';
 import {
   formatPeriodRange,
   fromDatetimeLocalValue,
@@ -34,10 +36,103 @@ export class AdminComponent implements OnInit {
   readonly serviceCategoryLabel = serviceCategoryLabel;
   listFilter: 'all' | 'car-rental' | 'chauffeur' | 'bus-rental' = 'all';
 
-  constructor(private carService: CarService) {}
+  assets: SiteAssets = defaultSiteAssets();
+  assetsSaving = false;
+  assetsError = '';
+  assetsSuccess = '';
+  readonly assetFields: Array<{
+    key: keyof SiteAssets;
+    label: string;
+    hint: string;
+    kind: 'image' | 'video';
+  }> = [
+    {
+      key: 'heroVideo',
+      label: 'Intro video',
+      hint: 'Paste a direct https:// .mp4 link (not a YouTube page)',
+      kind: 'video',
+    },
+    {
+      key: 'heroPoster',
+      label: 'Intro video poster',
+      hint: 'https:// image shown before the video plays',
+      kind: 'image',
+    },
+    {
+      key: 'logo',
+      label: 'Header logo / favicon',
+      hint: 'https:// image link',
+      kind: 'image',
+    },
+    {
+      key: 'aboutMainImage',
+      label: 'About image (main)',
+      hint: 'https:// image link',
+      kind: 'image',
+    },
+    {
+      key: 'aboutFloatImage',
+      label: 'About image (small)',
+      hint: 'https:// image link',
+      kind: 'image',
+    },
+    {
+      key: 'carRentalImage',
+      label: 'Car rentals card image',
+      hint: 'https:// image link',
+      kind: 'image',
+    },
+    {
+      key: 'chauffeurImage',
+      label: 'Chauffeur service card image',
+      hint: 'https:// image link',
+      kind: 'image',
+    },
+    {
+      key: 'busRentalImage',
+      label: 'Bus rentals card image',
+      hint: 'https:// image link',
+      kind: 'image',
+    },
+  ];
+
+  constructor(
+    private carService: CarService,
+    private siteAssetsService: SiteAssetsService
+  ) {}
 
   ngOnInit(): void {
     this.loadCars();
+    this.loadAssets();
+  }
+
+  loadAssets(): void {
+    this.siteAssetsService.getAssets().subscribe({
+      next: (assets) => {
+        this.assets = { ...defaultSiteAssets(), ...assets };
+      },
+      error: () => {
+        this.assetsError = 'Unable to load site assets.';
+      },
+    });
+  }
+
+  saveAssets(): void {
+    this.assetsSaving = true;
+    this.assetsError = '';
+    this.assetsSuccess = '';
+    this.siteAssetsService.updateAssets(this.assets).subscribe({
+      next: (assets) => {
+        this.assets = assets;
+        this.assetsSaving = false;
+        this.assetsSuccess = 'Site assets saved. Refresh the home page to see them.';
+        this.siteAssetsService.applyFavicon(assets.logo);
+      },
+      error: (err) => {
+        this.assetsSaving = false;
+        this.assetsError = err?.error?.error || 'Failed to save site assets.';
+      },
+    });
   }
 
   emptyForm(): CarInput {

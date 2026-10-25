@@ -1,5 +1,9 @@
 <section class="hero">
-  <div class="hero-media" aria-hidden="true">
+  <div
+    class="hero-media"
+    aria-hidden="true"
+    [style.background-image]="'url(' + assets.heroPoster + ')'"
+  >
     <video
       #heroVideo
       class="hero-video"
@@ -8,12 +12,9 @@
       loop
       playsinline
       preload="auto"
-      poster="/wix/banner.jpg"
+      [poster]="assets.heroPoster"
+      [src]="assets.heroVideo"
     >
-      <source
-        src="https://video.wixstatic.com/video/11062b_802873a9c69b4642966143da07b8ea88/720p/mp4/file.mp4"
-        type="video/mp4"
-      />
     </video>
   </div>
   <div class="hero-shade"></div>
@@ -27,7 +28,11 @@
       Let Zion Travels transform your travel experience with our top-notch rental services,
       ensuring comfort and reliability through every journey.
     </p>
-    <a class="cta-red" href="#services">Explore Services</a>
+    <div class="hero-actions">
+      <a class="cta-red" href="#services">Explore Services</a>
+      <a class="cta-ghost" [href]="callUrl">Call Us</a>
+      <a class="cta-ghost" [href]="mapsUrl" target="_blank" rel="noopener noreferrer">Navigate to Us</a>
+    </div>
   </div>
 </section>
 
@@ -44,8 +49,8 @@
       </p>
     </div>
     <div class="about-media reveal">
-      <img class="shot main" src="/wix/car2-lg.jpg" alt="Zion Travels vehicle" />
-      <img class="shot float" src="/wix/car1-lg.jpg" alt="City rental car" />
+      <img class="shot main" [src]="assets.aboutMainImage" alt="Zion Travels vehicle" />
+      <img class="shot float" [src]="assets.aboutFloatImage" alt="City rental car" />
     </div>
   </div>
 </section>
@@ -84,6 +89,19 @@
   </div>
 </section>
 
+<section id="contact" class="contact">
+  <div class="wrap contact-panel reveal">
+    <div>
+      <h2>Get in touch</h2>
+      <p>Call us to book a ride, or open maps to reach our office in Bowenpally.</p>
+    </div>
+    <div class="contact-actions">
+      <a class="contact-btn call" [href]="callUrl">Call Us</a>
+      <a class="contact-btn maps" [href]="mapsUrl" target="_blank" rel="noopener noreferrer">Navigate to Us</a>
+    </div>
+  </div>
+</section>
+
 <footer class="site-footer">
   <div class="wrap footer-grid">
     <div>
@@ -92,12 +110,14 @@
     </div>
     <div>
       <h4>Contact</h4>
-      <p>9100664083</p>
-      <p>9100696424</p>
+      <p><a [href]="callUrl">{{ primaryPhone }}</a></p>
+      <p><a [href]="secondaryCallUrl">{{ secondaryPhone }}</a></p>
     </div>
     <div>
       <h4>Address</h4>
-      <p>8,5,199 mallika arjuna colony old<br />Bowenpally, 500011</p>
+      <p>
+        <a [href]="mapsUrl" target="_blank" rel="noopener noreferrer">{{ address }}</a>
+      </p>
     </div>
   </div>
   <div class="footer-bottom">

@@ -1,7 +1,7 @@
 <header class="wix-header" [class.open]="menuOpen">
   <div class="inner">
     <a routerLink="/" class="logo" (click)="closeMenu()" aria-label="Zion Travels home">
-      <img src="/zion-logo.jpg" alt="Zion Travels" class="logo-mark" />
+      <img [src]="logo" alt="Zion Travels" class="logo-mark" />
       <span class="logo-text">Zion Travels</span>
     </a>
 
@@ -14,7 +14,8 @@
       <a href="#services" (click)="closeMenu()">Services</a>
       <!-- <a routerLink="/car-rentals" routerLinkActive="active" (click)="closeMenu()">Cars</a> -->
       <a href="#about" (click)="closeMenu()">About</a>
-      <!-- <a routerLink="/admin" routerLinkActive="active" (click)="closeMenu()">Admin</a> -->
+      <a [href]="callUrl" (click)="closeMenu()">Call Us</a>
+      <a [href]="mapsUrl" target="_blank" rel="noopener noreferrer" (click)="closeMenu()">Navigate</a>
       <a class="book-btn" routerLink="/car-rentals" (click)="closeMenu()">Book</a>
     </nav>
   </div>

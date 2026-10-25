@@ -1,6 +1,15 @@
-import { Component, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, AfterViewInit, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { buildWhatsAppUrl } from '../../config/contact.config';
+import {
+  ADDRESS_LINE,
+  PRIMARY_PHONE,
+  SECONDARY_PHONE,
+  buildCallUrl,
+  buildMapsUrl,
+  buildWhatsAppUrl,
+} from '../../config/contact.config';
+import { defaultSiteAssets, SiteAssets } from '../../models/site-assets.model';
+import { SiteAssetsService } from '../../services/site-assets.service';
 
 export interface HomeService {
   id: string;
@@ -17,8 +26,16 @@ export interface HomeService {
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
 })
-export class HomeComponent implements AfterViewInit {
+export class HomeComponent implements OnInit, AfterViewInit {
   @ViewChild('heroVideo') heroVideo?: ElementRef<HTMLVideoElement>;
+
+  assets: SiteAssets = defaultSiteAssets();
+  readonly callUrl = buildCallUrl();
+  readonly mapsUrl = buildMapsUrl();
+  readonly primaryPhone = PRIMARY_PHONE;
+  readonly secondaryPhone = SECONDARY_PHONE;
+  readonly secondaryCallUrl = buildCallUrl(SECONDARY_PHONE);
+  readonly address = ADDRESS_LINE;
 
   services: HomeService[] = [
     {
@@ -51,8 +68,20 @@ export class HomeComponent implements AfterViewInit {
 
   constructor(
     private host: ElementRef<HTMLElement>,
-    private router: Router
+    private router: Router,
+    private siteAssetsService: SiteAssetsService
   ) {}
+
+  ngOnInit(): void {
+    this.siteAssetsService.getAssets().subscribe({
+      next: (assets) => {
+        this.assets = { ...defaultSiteAssets(), ...assets };
+        this.applyServiceImages();
+        this.siteAssetsService.applyFavicon(this.assets.logo);
+        setTimeout(() => this.startHeroVideo(), 0);
+      },
+    });
+  }
 
   ngAfterViewInit(): void {
     const video = this.heroVideo?.nativeElement;
@@ -79,6 +108,29 @@ export class HomeComponent implements AfterViewInit {
     );
 
     this.observeReveals();
+    this.startHeroVideo();
+  }
+
+  private applyServiceImages(): void {
+    const images: Record<string, string> = {
+      'car-rentals': this.assets.carRentalImage,
+      'chauffeur-service': this.assets.chauffeurImage,
+      'bus-rentals': this.assets.busRentalImage,
+    };
+    this.services = this.services.map((service) => ({
+      ...service,
+      image: images[service.id] || service.image,
+    }));
+  }
+
+  private startHeroVideo(): void {
+    const video = this.heroVideo?.nativeElement;
+    if (!video) {
+      return;
+    }
+    video.muted = true;
+    video.load();
+    video.play().catch(() => undefined);
   }
 
   private observeReveals(): void {

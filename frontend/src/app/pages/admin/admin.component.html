@@ -5,6 +5,49 @@
     <p class="lede">Add cars for Car Rentals or Chauffeur Service and manage prices.</p>
   </div>
 
+  <form class="assets-form" (ngSubmit)="saveAssets()">
+    <h2>Site assets (links)</h2>
+    <p class="section-note">
+      Paste public <strong>https://</strong> links for images and the intro video. Host files on Drive, Dropbox, Cloudinary, or any CDN, then paste the direct URL here.
+    </p>
+
+    @if (assetsError) {
+      <p class="banner error">{{ assetsError }}</p>
+    }
+    @if (assetsSuccess) {
+      <p class="banner success">{{ assetsSuccess }}</p>
+    }
+
+    <div class="asset-list">
+      @for (field of assetFields; track field.key) {
+        <div class="asset-row" [class.full]="field.kind === 'video'">
+          <label>
+            <span>{{ field.label }}</span>
+            <small>{{ field.hint }}</small>
+            <input
+              [name]="field.key"
+              [(ngModel)]="assets[field.key]"
+              type="text"
+              placeholder="https://…"
+            />
+          </label>
+          @if (field.kind === 'image' && assets[field.key]) {
+            <img class="asset-preview" [src]="assets[field.key]" [alt]="field.label" />
+          }
+          @if (field.kind === 'video' && assets[field.key]) {
+            <video class="asset-preview video" [src]="assets[field.key]" muted playsinline></video>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="actions">
+      <button type="submit" class="btn primary" [disabled]="assetsSaving">
+        {{ assetsSaving ? 'Saving…' : 'Save asset links' }}
+      </button>
+    </div>
+  </form>
+
   <div class="admin-layout">
     <form class="car-form" (ngSubmit)="submit()" #carForm="ngForm">
       <h2>{{ form.serviceCategory === 'bus-rental' ? (editingId ? 'Edit bus' : 'Add a bus') : editingId ? 'Edit car' : 'Add a car' }}</h2>

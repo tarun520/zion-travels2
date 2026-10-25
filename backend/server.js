@@ -4,6 +4,7 @@ const express = require('express');
 const cors = require('cors');
 const carsRouter = require('./routes/cars');
 const bookingsRouter = require('./routes/bookings');
+const siteAssetsRouter = require('./routes/site-assets');
 
 const app = express();
 const PORT = process.env.PORT || 5055;
@@ -28,6 +29,7 @@ app.get('/api/health', (_req, res) => {
 
 app.use('/api/cars', carsRouter);
 app.use('/api/bookings', bookingsRouter);
+app.use('/api/site-assets', siteAssetsRouter);
 
 app.use((err, _req, res, _next) => {
   console.error(err);
